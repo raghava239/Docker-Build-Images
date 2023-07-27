@@ -1,6 +1,6 @@
-From ubuntu
-RUN apt-get update -y
+From python:3.9-alpine
+RUN pip install flask
 RUN apt-get install apache2 -y
-ADD . /var/www/html
-ENTRYPOINT apachectl -D FOREGROUND
-ENV name Raghu_image
+WORKDIR /myapp
+COPY main.py /myapp/main.py
+CMD ["python", "/myapp/main.py"]
