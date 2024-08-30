@@ -9,3 +9,6 @@ steps:
 
 images:
   - 'us-central1-docker.pkg.dev/raghupothula/dockerimages:latest'
+
+  options:
+  logging: 'CLOUD_LOGGING_ONLY'  # Ensure all logs are captured in Cloud Logging
