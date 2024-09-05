@@ -1,15 +1,48 @@
-  
 steps:
-  # Step 1: Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest', '.']
+  # Step 1: Define the version tag (replace `v1` with the desired version)
+  - name: 'alpine'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        if [ -f version.txt ]; then
+          version=$(cat version.txt)
+          new_version="v$(( ${version//v/} + 1 ))"
+        else
+          new_version="v1"
+        fi
+        echo $new_version > version.txt
+        echo "VERSION=$new_version" >> $${_BUILDER_DIR}/env/env_file
+    volumes:
+      - name: "builder-env"
+        path: "/workspace/env"
 
-  # Step 2: Push the Docker image to Artifact Registry
+  # Step 2: Build the Docker image with the new version (base image: ubuntu)
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest']
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_VERSION}'
+      - '.'
+    env:
+      - 'VERSION=${_VERSION}'
+    volumes:
+      - name: "builder-env"
+        path: "/workspace/env"
+
+  # Step 3: Push the Docker image to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_VERSION}'
+    env:
+      - 'VERSION=${_VERSION}'
+    volumes:
+      - name: "builder-env"
+        path: "/workspace/env"
 
 images:
-  - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest'
+  - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_VERSION}'
 
 options:
   logging: 'CLOUD_LOGGING_ONLY'  # Ensure all logs are captured in Cloud Logging
