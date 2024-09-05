@@ -1,42 +1,14 @@
 steps:
-  # Step 1: Set the timestamp-based tag
-  - name: 'alpine'
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - |
-        timestamp=$(date +%Y%m%d%H%M%S)
-        echo "IMAGE_TAG=$timestamp" >> $${_BUILDER_DIR}/env/env_file
-    volumes:
-      - name: "builder-env"
-        path: "/workspace/env"
-
-  # Step 2: Build the Docker image with the new timestamp tag
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_IMAGE_TAG}'
-      - '.'
-    env:
-      - 'IMAGE_TAG=${_IMAGE_TAG}'
-    volumes:
-      - name: "builder-env"
-        path: "/workspace/env"
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest', '.']
 
-  # Step 3: Push the Docker image with the new timestamp tag
+  # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_IMAGE_TAG}'
-    env:
-      - 'IMAGE_TAG=${_IMAGE_TAG}'
-    volumes:
-      - name: "builder-env"
-        path: "/workspace/env'
+    args: ['push', 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest']
 
 images:
-  - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu:${_IMAGE_TAG}'
+  - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest'
 
 options:
   logging: 'CLOUD_LOGGING_ONLY'  # Ensure all logs are captured in Cloud Logging
