@@ -17,6 +17,15 @@ steps:
         'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest'
       ]
 
+  # Step 3: Deploy the image to the GKE cluster
+  - name: 'gcr.io/cloud-builders/gke-deploy'
+    args:
+      - run
+      - --filename=deployment.yaml # Path to your Kubernetes manifest file
+      - --image=us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest
+      - --location=us-central1-a # Replace with your cluster's zone or region
+      - --cluster=private-cluster
+
 images:
   - 'us-central1-docker.pkg.dev/raghupothula/dockerimages/ubuntu01:latest'
 
